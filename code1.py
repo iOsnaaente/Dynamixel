@@ -1,11 +1,9 @@
 import PyDynamixel_v2.PyDynamixel_v2 as pd 
 import SerialReader.Serial as sr
-from time import sleep
-from math import pi
-import serial 
+from time import sleep, time 
 
+import serial 
 import pygame 
-import time 
 import math 
 
 # CLASSE PARA AS CORES NO ESTILO RGB - opcional 
@@ -32,8 +30,8 @@ POS_MOTOR1 = [125, 125]
 POS_MOTOR2 = [125, 350]
 POS_MOTORS = [125, 575]
 
-angle_motor1 = 50
-angle_motor2 = 30
+angle_motor1 = 50.0
+angle_motor2 = 30.0
 
 WIDTHSURFACE = 750
 
@@ -48,7 +46,7 @@ pointsMotor2 = []
 tempo = 5
 rate = 30
 
-girar = True
+girar = False
 meioGiro = False 
 
 BAUDRATE = 115200
@@ -181,12 +179,17 @@ def draw_texts():
 
 # definição das portas seriais conectadas ao RS845
 while True:    
+    print('Detectando portas Seriais....\n')
     comports = sr.serialPorts()
     for i, com in enumerate(comports):
         print(i, com, end='\t')
-
-    ind = input("\nEscolha a porta Serial onde esta conectado o Conversor RS845: ")
     
+    if comports != []:
+        ind = input("\nEscolha a porta Serial onde esta conectado o Conversor RS845: ")
+    else: 
+        print("Nenhuma porta serial detectada ! \nPressione enter para atualizar")
+        input()
+
     try:
         ind = int(ind)
         comport = serial.Serial(comports[ind], baudrate= BAUDRATE)
@@ -194,11 +197,14 @@ while True:
         comport = comports[ind]
         break
     except:
+        print("Comport inválida, tente outra!")
         comport = 0
 
 serial = pd.DxlComm(port=comport, baudrate=BAUDRATE)
 
+# Definição dos IDS
 ids = [1, 28]
+
 # Define os ids dos motores usados
 while True:
     print("Ids dos dynamixels cadastrados %s \n" %ids)
@@ -221,9 +227,7 @@ serial.attach_joints([joint28, joint01])
 serial.enable_torques()
 
 # definição dos Offsets 
-offsetValue = round( abs( angle_motor2 - angle_motor1 ) )
-offsetValue = offsetValue if offsetValue < 180 else 360 - offsetValue
-    
+offsetValue = 0.0
 
 # inicio do pygame 
 pygame.init()
@@ -244,7 +248,7 @@ pygame.display.set_caption("Teste NSEA - Taura")
 # Clock 
 clk = pygame.time.Clock()
 
-timeRate   = time.time()
+timeRate   = time()
 
 while True: 
 
@@ -283,10 +287,14 @@ while True:
 
     if girar:
         attAng = 360 / (tempo*rate) if tempo > 0 else 0 
-        if time.time() - timeRate > 1/60:
-            timeRate = time.time()
+        if time() - timeRate > 1/60:
+            timeRate = time()
             angle_motor1 = angle_motor1 + attAng if angle_motor1 + attAng < 360.0 else 0.0 
             angle_motor2 = angle_motor2 + attAng if angle_motor2 + attAng < 360.0 else 0.0
+
+    # definição dos Offsets 
+    offsetValue = round( abs( angle_motor2 - angle_motor1 ) )
+    offsetValue = offsetValue if offsetValue < 180.0 else 360.0 - offsetValue
 
     serial.send_angles({ids[0] : angle_motor1, ids[1] : angle_motor2})
     angles = serial.get_angles()
