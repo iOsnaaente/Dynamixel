@@ -49,7 +49,7 @@ rate = 30
 girar = False
 meioGiro = False 
 
-BAUDRATE = 115200
+BAUDRATE = 1000000
 
 angles = 0
 
@@ -69,8 +69,8 @@ def draw_basic():
     pointsMotor1 = []
     pointsMotor2 = []
     for i in range(WIDTHSURFACE):
-        pointsMotor1.append( f(angle_motor1+i)*RAIO_MOTOR1 )
-        pointsMotor2.append( f(angle_motor2+i)*RAIO_MOTOR2 )
+        pointsMotor1.append( f(angle_motor1+i*va)*RAIO_MOTOR1 )
+        pointsMotor2.append( f(angle_motor2+i*va)*RAIO_MOTOR2 )
     
     # MOTOR 1
     surfaceMotors = [ [POS_MOTOR1[0], POS_MOTOR1[1]-RAIO_MOTOR1],
@@ -78,8 +78,8 @@ def draw_basic():
     pygame.draw.rect(screen, cor.black, [[surfaceMotors[0][0]-2, surfaceMotors[0][1]-2],[surfaceMotors[1][0]+4,surfaceMotors[1][1]+4]])
     pygame.draw.rect(screen, cor.lightGray, surfaceMotors)
 
-    for x in range(WIDTHSURFACE):
-        pygame.draw.circle(screen, cor.blue, [POS_MOTOR1[0]+x, round(POS_MOTOR1[1]+pointsMotor1[x])], 1 )
+    for x in range(WIDTHSURFACE-RAIO_MOTOR1):
+        pygame.draw.circle(screen, cor.red, [POS_MOTOR1[0]+RAIO_MOTOR1+x, round(POS_MOTOR1[1]+pointsMotor1[x])], 1 )
 
     line_motor1 = [  
         POS_MOTOR1[0]+round(RAIO_MOTOR1*math.cos(math.radians(angle_motor1))),
@@ -87,7 +87,8 @@ def draw_basic():
         ]
     pygame.draw.circle(screen, cor.black, POS_MOTOR1, RAIO_MOTOR1+2 )
     pygame.draw.circle(screen, cor.orange, POS_MOTOR1, RAIO_MOTOR1   )
-    pygame.draw.line(screen, cor.black, POS_MOTOR1, line_motor1, 3 )
+    pygame.draw.line(screen, cor.red, POS_MOTOR1, line_motor1, 3 )
+    pygame.draw.line(screen, cor.red, line_motor1, [ POS_MOTOR1[0]+RAIO_MOTOR1,line_motor1[1]], 3 )
     
     # MOTOR 2
     surfaceMotors = [ [POS_MOTOR2[0], POS_MOTOR2[1]-RAIO_MOTOR2],
@@ -95,8 +96,8 @@ def draw_basic():
     pygame.draw.rect(screen, cor.black, [[surfaceMotors[0][0]-2, surfaceMotors[0][1]-2],[surfaceMotors[1][0]+4,surfaceMotors[1][1]+4]])
     pygame.draw.rect(screen, cor.lightGray, surfaceMotors)
 
-    for x in range(WIDTHSURFACE):
-        pygame.draw.circle(screen, cor.red, [POS_MOTOR2[0]+x, round(POS_MOTOR2[1]+pointsMotor2[x])], 1 )
+    for x in range(WIDTHSURFACE-RAIO_MOTOR2):
+        pygame.draw.circle(screen, cor.blue, [POS_MOTOR2[0]+RAIO_MOTOR2+x, round(POS_MOTOR2[1]+pointsMotor2[x])], 1 )
 
     line_motor2 = [
         POS_MOTOR2[0]+round(RAIO_MOTOR2*math.cos(math.radians(angle_motor2))),
@@ -104,7 +105,8 @@ def draw_basic():
         ]   
     pygame.draw.circle(screen, cor.black, POS_MOTOR2, RAIO_MOTOR2+2 )
     pygame.draw.circle(screen, cor.orange, POS_MOTOR2, RAIO_MOTOR2 )
-    pygame.draw.line(screen, cor.black, POS_MOTOR2, line_motor2, 3 )
+    pygame.draw.line(screen, cor.blue, POS_MOTOR2, line_motor2, 3 )
+    pygame.draw.line(screen, cor.blue, line_motor2, [ POS_MOTOR2[0]+RAIO_MOTOR2,line_motor2[1]], 3 )
 
     # MOTORS
     surfaceMotors = [ [POS_MOTORS[0], POS_MOTORS[1]-RAIO_MOTORS],
@@ -112,9 +114,9 @@ def draw_basic():
     pygame.draw.rect(screen, cor.black, [[surfaceMotors[0][0]-2, surfaceMotors[0][1]-2],[surfaceMotors[1][0]+4,surfaceMotors[1][1]+4]])
     pygame.draw.rect(screen, cor.lightGray, surfaceMotors)
 
-    for x in range(WIDTHSURFACE):
-        pygame.draw.circle(screen, cor.blue, [POS_MOTORS[0]+x, round(POS_MOTORS[1]+pointsMotor1[x])], 1 )
-        pygame.draw.circle(screen, cor.red, [POS_MOTORS[0]+x, round(POS_MOTORS[1]+pointsMotor2[x])], 1 )
+    for x in range(WIDTHSURFACE-RAIO_MOTORS):
+        pygame.draw.circle(screen, cor.red, [POS_MOTORS[0]+RAIO_MOTORS+x, round(POS_MOTORS[1]+pointsMotor1[x])], 1 )
+        pygame.draw.circle(screen, cor.blue, [POS_MOTORS[0]+RAIO_MOTORS+x, round(POS_MOTORS[1]+pointsMotor2[x])], 1 )
 
     line_motor1 = [
         POS_MOTORS[0]+round(RAIO_MOTORS*math.cos(math.radians(angle_motor2))),
@@ -124,11 +126,12 @@ def draw_basic():
         POS_MOTORS[0]+round(RAIO_MOTORS*math.cos(math.radians(angle_motor1))),
         POS_MOTORS[1]+round(RAIO_MOTORS*math.sin(math.radians(angle_motor1))) 
         ]   
-
     pygame.draw.circle(screen, cor.black, POS_MOTORS, RAIO_MOTORS+2 )
     pygame.draw.circle(screen, cor.lightRed, POS_MOTORS, RAIO_MOTORS )
-    pygame.draw.line(screen, cor.black, POS_MOTORS, line_motor1, 3 )
-    pygame.draw.line(screen, cor.black, POS_MOTORS, line_motor2, 3 )
+    pygame.draw.line(screen, cor.blue, POS_MOTORS, line_motor1, 3 )
+    pygame.draw.line(screen, cor.red, POS_MOTORS, line_motor2, 3 )
+    pygame.draw.line(screen, cor.blue, line_motor1, [ POS_MOTORS[0]+RAIO_MOTORS,line_motor1[1]], 3 )
+    pygame.draw.line(screen, cor.red, line_motor2, [ POS_MOTORS[0]+RAIO_MOTORS,line_motor2[1]], 3 )
 
 # função de escrita dos textos 
 def draw_texts():
@@ -203,7 +206,7 @@ while True:
 serial = pd.DxlComm(port=comport, baudrate=BAUDRATE)
 
 # Definição dos IDS
-ids = [1, 28]
+ids = [1, 2]
 
 # Define os ids dos motores usados
 while True:
@@ -250,6 +253,8 @@ clk = pygame.time.Clock()
 
 timeRate   = time()
 
+va = 0.0
+
 while True: 
 
     screen.fill(cor.gray)
@@ -267,6 +272,7 @@ while True:
 
             if event.key == pygame.K_p:
                 girar = True if girar is False else False 
+
             if event.key == pygame.K_i:
                 angle_motor1 = angle_motor1 + 1
             if event.key == pygame.K_u:
@@ -284,7 +290,9 @@ while True:
 
     draw_basic()
     draw_texts()
-
+    
+    va = 360 / (tempo*rate*5) if tempo != 0 else 0
+    
     if girar:
         attAng = 360 / (tempo*rate) if tempo > 0 else 0 
         if time() - timeRate > 1/60:
