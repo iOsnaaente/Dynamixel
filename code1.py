@@ -1,11 +1,9 @@
 import PyDynamixel_v2.PyDynamixel_v2 as pd 
 import SerialReader.Serial as sr
-from time import sleep
-from math import pi
-import serial 
+from time import sleep, time 
 
+import serial 
 import pygame 
-import time 
 import math 
 
 # CLASSE PARA AS CORES NO ESTILO RGB - opcional 
@@ -32,8 +30,8 @@ POS_MOTOR1 = [125, 125]
 POS_MOTOR2 = [125, 350]
 POS_MOTORS = [125, 575]
 
-angle_motor1 = 50
-angle_motor2 = 30
+angle_motor1 = 50.0
+angle_motor2 = 30.0
 
 WIDTHSURFACE = 750
 
@@ -48,10 +46,10 @@ pointsMotor2 = []
 tempo = 5
 rate = 30
 
-girar = True
+girar = False
 meioGiro = False 
 
-BAUDRATE = 115200
+BAUDRATE = 1000000
 
 angles = 0
 
@@ -71,8 +69,8 @@ def draw_basic():
     pointsMotor1 = []
     pointsMotor2 = []
     for i in range(WIDTHSURFACE):
-        pointsMotor1.append( f(angle_motor1+i)*RAIO_MOTOR1 )
-        pointsMotor2.append( f(angle_motor2+i)*RAIO_MOTOR2 )
+        pointsMotor1.append( f(angle_motor1+i*va)*RAIO_MOTOR1 )
+        pointsMotor2.append( f(angle_motor2+i*va)*RAIO_MOTOR2 )
     
     # MOTOR 1
     surfaceMotors = [ [POS_MOTOR1[0], POS_MOTOR1[1]-RAIO_MOTOR1],
@@ -80,8 +78,8 @@ def draw_basic():
     pygame.draw.rect(screen, cor.black, [[surfaceMotors[0][0]-2, surfaceMotors[0][1]-2],[surfaceMotors[1][0]+4,surfaceMotors[1][1]+4]])
     pygame.draw.rect(screen, cor.lightGray, surfaceMotors)
 
-    for x in range(WIDTHSURFACE):
-        pygame.draw.circle(screen, cor.blue, [POS_MOTOR1[0]+x, round(POS_MOTOR1[1]+pointsMotor1[x])], 1 )
+    for x in range(WIDTHSURFACE-RAIO_MOTOR1):
+        pygame.draw.circle(screen, cor.red, [POS_MOTOR1[0]+RAIO_MOTOR1+x, round(POS_MOTOR1[1]+pointsMotor1[x])], 1 )
 
     line_motor1 = [  
         POS_MOTOR1[0]+round(RAIO_MOTOR1*math.cos(math.radians(angle_motor1))),
@@ -89,7 +87,8 @@ def draw_basic():
         ]
     pygame.draw.circle(screen, cor.black, POS_MOTOR1, RAIO_MOTOR1+2 )
     pygame.draw.circle(screen, cor.orange, POS_MOTOR1, RAIO_MOTOR1   )
-    pygame.draw.line(screen, cor.black, POS_MOTOR1, line_motor1, 3 )
+    pygame.draw.line(screen, cor.red, POS_MOTOR1, line_motor1, 3 )
+    pygame.draw.line(screen, cor.red, line_motor1, [ POS_MOTOR1[0]+RAIO_MOTOR1,line_motor1[1]], 3 )
     
     # MOTOR 2
     surfaceMotors = [ [POS_MOTOR2[0], POS_MOTOR2[1]-RAIO_MOTOR2],
@@ -97,8 +96,8 @@ def draw_basic():
     pygame.draw.rect(screen, cor.black, [[surfaceMotors[0][0]-2, surfaceMotors[0][1]-2],[surfaceMotors[1][0]+4,surfaceMotors[1][1]+4]])
     pygame.draw.rect(screen, cor.lightGray, surfaceMotors)
 
-    for x in range(WIDTHSURFACE):
-        pygame.draw.circle(screen, cor.red, [POS_MOTOR2[0]+x, round(POS_MOTOR2[1]+pointsMotor2[x])], 1 )
+    for x in range(WIDTHSURFACE-RAIO_MOTOR2):
+        pygame.draw.circle(screen, cor.blue, [POS_MOTOR2[0]+RAIO_MOTOR2+x, round(POS_MOTOR2[1]+pointsMotor2[x])], 1 )
 
     line_motor2 = [
         POS_MOTOR2[0]+round(RAIO_MOTOR2*math.cos(math.radians(angle_motor2))),
@@ -106,7 +105,8 @@ def draw_basic():
         ]   
     pygame.draw.circle(screen, cor.black, POS_MOTOR2, RAIO_MOTOR2+2 )
     pygame.draw.circle(screen, cor.orange, POS_MOTOR2, RAIO_MOTOR2 )
-    pygame.draw.line(screen, cor.black, POS_MOTOR2, line_motor2, 3 )
+    pygame.draw.line(screen, cor.blue, POS_MOTOR2, line_motor2, 3 )
+    pygame.draw.line(screen, cor.blue, line_motor2, [ POS_MOTOR2[0]+RAIO_MOTOR2,line_motor2[1]], 3 )
 
     # MOTORS
     surfaceMotors = [ [POS_MOTORS[0], POS_MOTORS[1]-RAIO_MOTORS],
@@ -114,9 +114,9 @@ def draw_basic():
     pygame.draw.rect(screen, cor.black, [[surfaceMotors[0][0]-2, surfaceMotors[0][1]-2],[surfaceMotors[1][0]+4,surfaceMotors[1][1]+4]])
     pygame.draw.rect(screen, cor.lightGray, surfaceMotors)
 
-    for x in range(WIDTHSURFACE):
-        pygame.draw.circle(screen, cor.blue, [POS_MOTORS[0]+x, round(POS_MOTORS[1]+pointsMotor1[x])], 1 )
-        pygame.draw.circle(screen, cor.red, [POS_MOTORS[0]+x, round(POS_MOTORS[1]+pointsMotor2[x])], 1 )
+    for x in range(WIDTHSURFACE-RAIO_MOTORS):
+        pygame.draw.circle(screen, cor.red, [POS_MOTORS[0]+RAIO_MOTORS+x, round(POS_MOTORS[1]+pointsMotor1[x])], 1 )
+        pygame.draw.circle(screen, cor.blue, [POS_MOTORS[0]+RAIO_MOTORS+x, round(POS_MOTORS[1]+pointsMotor2[x])], 1 )
 
     line_motor1 = [
         POS_MOTORS[0]+round(RAIO_MOTORS*math.cos(math.radians(angle_motor2))),
@@ -126,11 +126,12 @@ def draw_basic():
         POS_MOTORS[0]+round(RAIO_MOTORS*math.cos(math.radians(angle_motor1))),
         POS_MOTORS[1]+round(RAIO_MOTORS*math.sin(math.radians(angle_motor1))) 
         ]   
-
     pygame.draw.circle(screen, cor.black, POS_MOTORS, RAIO_MOTORS+2 )
     pygame.draw.circle(screen, cor.lightRed, POS_MOTORS, RAIO_MOTORS )
-    pygame.draw.line(screen, cor.black, POS_MOTORS, line_motor1, 3 )
-    pygame.draw.line(screen, cor.black, POS_MOTORS, line_motor2, 3 )
+    pygame.draw.line(screen, cor.blue, POS_MOTORS, line_motor1, 3 )
+    pygame.draw.line(screen, cor.red, POS_MOTORS, line_motor2, 3 )
+    pygame.draw.line(screen, cor.blue, line_motor1, [ POS_MOTORS[0]+RAIO_MOTORS,line_motor1[1]], 3 )
+    pygame.draw.line(screen, cor.red, line_motor2, [ POS_MOTORS[0]+RAIO_MOTORS,line_motor2[1]], 3 )
 
 # função de escrita dos textos 
 def draw_texts():
@@ -181,12 +182,17 @@ def draw_texts():
 
 # definição das portas seriais conectadas ao RS845
 while True:    
+    print('Detectando portas Seriais....\n')
     comports = sr.serialPorts()
     for i, com in enumerate(comports):
         print(i, com, end='\t')
-
-    ind = input("\nEscolha a porta Serial onde esta conectado o Conversor RS845: ")
     
+    if comports != []:
+        ind = input("\nEscolha a porta Serial onde esta conectado o Conversor RS845: ")
+    else: 
+        print("Nenhuma porta serial detectada ! \nPressione enter para atualizar")
+        input()
+
     try:
         ind = int(ind)
         comport = serial.Serial(comports[ind], baudrate= BAUDRATE)
@@ -194,11 +200,14 @@ while True:
         comport = comports[ind]
         break
     except:
+        print("Comport inválida, tente outra!")
         comport = 0
 
 serial = pd.DxlComm(port=comport, baudrate=BAUDRATE)
 
-ids = [1, 28]
+# Definição dos IDS
+ids = [1, 2]
+
 # Define os ids dos motores usados
 while True:
     print("Ids dos dynamixels cadastrados %s \n" %ids)
@@ -221,9 +230,7 @@ serial.attach_joints([joint28, joint01])
 serial.enable_torques()
 
 # definição dos Offsets 
-offsetValue = round( abs( angle_motor2 - angle_motor1 ) )
-offsetValue = offsetValue if offsetValue < 180 else 360 - offsetValue
-    
+offsetValue = 0.0
 
 # inicio do pygame 
 pygame.init()
@@ -244,7 +251,9 @@ pygame.display.set_caption("Teste NSEA - Taura")
 # Clock 
 clk = pygame.time.Clock()
 
-timeRate   = time.time()
+timeRate   = time()
+
+va = 0.0
 
 while True: 
 
@@ -263,6 +272,7 @@ while True:
 
             if event.key == pygame.K_p:
                 girar = True if girar is False else False 
+
             if event.key == pygame.K_i:
                 angle_motor1 = angle_motor1 + 1
             if event.key == pygame.K_u:
@@ -280,13 +290,19 @@ while True:
 
     draw_basic()
     draw_texts()
-
+    
+    va = 360 / (tempo*rate*5) if tempo != 0 else 0
+    
     if girar:
         attAng = 360 / (tempo*rate) if tempo > 0 else 0 
-        if time.time() - timeRate > 1/60:
-            timeRate = time.time()
+        if time() - timeRate > 1/60:
+            timeRate = time()
             angle_motor1 = angle_motor1 + attAng if angle_motor1 + attAng < 360.0 else 0.0 
             angle_motor2 = angle_motor2 + attAng if angle_motor2 + attAng < 360.0 else 0.0
+
+    # definição dos Offsets 
+    offsetValue = round( abs( angle_motor2 - angle_motor1 ) )
+    offsetValue = offsetValue if offsetValue < 180.0 else 360.0 - offsetValue
 
     serial.send_angles({ids[0] : angle_motor1, ids[1] : angle_motor2})
     angles = serial.get_angles()
